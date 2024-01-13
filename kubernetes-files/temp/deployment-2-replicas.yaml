@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-web-depl-repl
+  labels:
+    app: my-k8s-app
+    env: prod
+    owner: iam
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      project: fbi
+  template:
+    metadata:
+      labels:
+        project: fbi
+    spec:
+      containers:
+        - name: fbi-web
+          image: asafsaf/k8s-test:latest
+          ports:
+            - containerPort: 8089

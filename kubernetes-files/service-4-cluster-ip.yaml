@@ -1,0 +1,202 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dep
+  labels:
+    app: hello-app
+    env: prod
+    owner: iam
+spec:
+  selector:
+    matchLabels:
+      project: hello-project
+  template:
+    metadata:
+      labels:
+        project: hello-project  # Selector will look for those Pods label.
+    spec:
+      containers:
+        - name: hello-web
+          image: asafsaf/k8s-test:latest
+          ports:
+            - containerPort: 8089
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bye-dep
+  labels:
+    app: bye-app
+    env: prod
+    owner: iam
+spec:
+  selector:
+    matchLabels:
+      project: bye-project
+  template:
+    metadata:
+      labels:
+        project: bye-project  # Selector will look for those Pods label.
+    spec:
+      containers:
+        - name: bye-web
+          image: asafsaf/demo:latest
+          ports:
+            - containerPort: 8090
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sleep-dep
+  labels:
+    app: sleep-app
+    env: prod
+    owner: iam
+spec:
+  selector:
+    matchLabels:
+      project: sleep-project
+  template:
+    metadata:
+      labels:
+        project: sleep-project  # Selector will look for those Pods label.
+    spec:
+      containers:
+        - name: sleep-web
+          image: asafsaf/sleep:latest
+          ports:
+            - containerPort: 8091
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hello-as
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: hello-dep
+  minReplicas: 3
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: bye-as
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: bye-dep
+  minReplicas: 3
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sleep-as
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: sleep-dep
+  minReplicas: 3
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-service
+  labels:
+    env: prod
+    owner: iam
+spec:
+  type: ClusterIP
+  selector:
+    project: hello-project    # Selecting Pods by labels
+  ports:
+    - name: hello-app-listener
+      protocol: TCP
+      port: 8089    # Port on ClusterIP
+      targetPort: 8089  # Port on Pod
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bye-service
+  labels:
+    env: prod
+    owner: iam
+spec:
+  type: ClusterIP
+  selector:
+    project: bye-project    # Selecting Pods by labels
+  ports:
+    - name: bye-app-listener
+      protocol: TCP
+      port: 8090
+      targetPort: 8090
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sleep-service
+  labels:
+    env: prod
+    owner: iam
+spec:
+  type: ClusterIP
+  selector:
+    project: sleep-project    # Selecting Pods by labels
+  ports:
+    - name: sleep-app-listener
+      protocol: TCP
+      port: 8091
+      targetPort: 8091
